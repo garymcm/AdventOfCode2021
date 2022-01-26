@@ -1,0 +1,9 @@
+module.exports = {
+  tabWidth: 2,
+  semi: false,
+  singleQuote: true,
+  stylelintIntegration: true,
+  eslintIntegration: true,
+  trailingComma: 'es5',
+  overrides: [{ files: '*.html', options: { parser: 'html' } }],
+}
