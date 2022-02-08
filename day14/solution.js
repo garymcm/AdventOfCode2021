@@ -131,7 +131,7 @@ function calculatePart2() {
 function getCountsByLetter(numberOfIterations = 0) {
   // Start the counts off with the initial polymer string
   let letterCount = initializeLetterCount(TEMPLATE)
-  // Well track pair counts, so intialize with the initial polymer string
+  // We'll track pair counts, so intialize with the initial polymer string
   let pairs = initializePairs(TEMPLATE)
   for (let i = 0; i < numberOfIterations; i++) {
     const stepPairs = new Map()
