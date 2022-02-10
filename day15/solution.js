@@ -109,20 +109,20 @@ function solution() {
 }
 
 function calculatePart1() {
-  const start = [0, 0]
+  const start = { x: 0, y: 0 }
   const lastCol = CAVE_MAP.length - 1
   const lastRow = CAVE_MAP[0].length - 1
-  const goal = [lastCol, lastRow]
+  const goal = { x: lastCol, y: lastRow }
   const lowestRiskScore = dijkstraTraverse(CAVE_MAP, start, goal)
   return lowestRiskScore
 }
 
 function calculatePart2() {
   const expandedGrid = expandMap(CAVE_MAP)
-  const start = [0, 0]
+  const start = { x: 0, y: 0 }
   const lastCol = expandedGrid.length - 1
   const lastRow = expandedGrid[0].length - 1
-  const goal = [lastCol, lastRow]
+  const goal = { x: lastCol, y: lastRow }
   return dijkstraTraverse(expandedGrid, start, goal)
 }
 
@@ -193,11 +193,24 @@ class PriorityQueue {
   }
 }
 
+function coordinatesToIndex({ x, y }, map) {
+  return x + y * map.length
+}
+
+function indexToCoordinates(index, map) {
+  const x = index % map.length
+  const y = (index - x) / map.length
+  return {
+    x,
+    y,
+  }
+}
+
 /** Find shortest path using Dijkstra Algorithm */
 function dijkstraTraverse(grid, startCoord, goalCoord) {
-  const start = `${startCoord[0]}-${startCoord[1]}`
-  const goal = `${goalCoord[0]}-${goalCoord[1]}`
-  const [lastCol, lastRow] = goalCoord
+  const start = coordinatesToIndex(startCoord, grid)
+  const goal = coordinatesToIndex(goalCoord, grid)
+  const { y: lastCol, x: lastRow } = goalCoord
   const nextNodes = new PriorityQueue()
   const previous = new Map()
   const costs = new Map()
@@ -211,12 +224,13 @@ function dijkstraTraverse(grid, startCoord, goalCoord) {
       break
     }
 
-    for (let next of getNeighbors(current, lastCol, lastRow)) {
-      const newCost = costs.get(current) + getCost(grid, next)
-      if (!costs.has(next) || newCost < costs.get(next)) {
-        costs.set(next, newCost)
-        nextNodes.enqueue(next, newCost)
-        previous.set(next, current)
+    for (let next of getNeighbors(grid, current, lastCol, lastRow)) {
+      let idxNext = coordinatesToIndex(next, grid)
+      const newCost = costs.get(current) + getCost(idxNext, grid)
+      if (!costs.has(idxNext) || newCost < costs.get(idxNext)) {
+        costs.set(idxNext, newCost)
+        nextNodes.enqueue(idxNext, newCost)
+        previous.set(idxNext, current)
       }
     }
   }
@@ -224,26 +238,26 @@ function dijkstraTraverse(grid, startCoord, goalCoord) {
 }
 
 /** Get the at the `coord`. */
-function getCost(grid, coord) {
-  const [vPos, hPos] = coord.split('-').map(Number)
-  return grid[vPos][hPos]
+function getCost(index, grid) {
+  const { x, y } = indexToCoordinates(index, grid)
+  return grid[y][x]
 }
 
-/** Get the neighbors for the `coord`. */
-function getNeighbors(coord, lastCol, lastRow) {
-  const [vPos, hPos] = coord.split('-').map(Number)
+/** Get the neighbors for the `index`. */
+function getNeighbors(grid, index, lastCol, lastRow) {
+  const { x, y } = indexToCoordinates(index, grid)
   const neighbors = []
-  if (vPos > 0) {
-    neighbors.push(`${vPos - 1}-${hPos}`)
+  if (y > 0) {
+    neighbors.push({ x, y: y - 1 })
   }
-  if (vPos < lastCol) {
-    neighbors.push(`${vPos + 1}-${hPos}`)
+  if (y < lastCol) {
+    neighbors.push({ y: y + 1, x })
   }
-  if (hPos > 0) {
-    neighbors.push(`${vPos}-${hPos - 1}`)
+  if (x > 0) {
+    neighbors.push({ x: x - 1, y })
   }
-  if (hPos < lastRow) {
-    neighbors.push(`${vPos}-${hPos + 1}`)
+  if (x < lastRow) {
+    neighbors.push({ x: x + 1, y })
   }
   return neighbors
 }
